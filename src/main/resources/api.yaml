@@ -1,0 +1,159 @@
+openapi: 3.0.3
+info:
+  title: Epic Mobile Subscription Storage API
+  version: 1.0.0
+
+paths:
+  /subscriptions:
+    get:
+      description: "List of all mobile phone subscriptions"
+      parameters:
+        - in: query
+          name: msisdn
+          required: false
+          schema:
+            type: string
+            example: "35699123456"
+        - in: query
+          name: customerIdOwner
+          required: false
+          schema:
+            type: integer
+            example: 147852369
+        - in: query
+          name: "customerIdUser"
+          required: false
+          schema:
+            type: integer
+            example: 987456321
+        - in: query
+          name: "serviceType"
+          required: false
+          schema:
+            type: string
+            enum:
+              - "MOBILE_PREPAID"
+              - "MOBILE_POSTPAID"
+      responses:
+        '200':
+          description: "List of all mobile phone subscriptions"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MobileSubscription'
+        '500':
+          $ref: '#/components/responses/Error'
+    post:
+      description: "Add a mobile number along with the subscriber's information."
+      responses:
+        '201':
+          description: "Subscription created successfully."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileSubscription'
+              example: {"msisdn":"35699123456", "customerIdOwner":147852369, "customerIdUser":987456321, "serviceType":"MOBILE_PREPAID"}
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+  /subscriptions/{id}:
+    get:
+      description: "Get the details of a subscription using the subscription ID."
+      responses:
+        '200':
+          description: "Returns the details on a mobile phone subscription."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileSubscription'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+    put:
+      description: "Updates the details (customerIdOwner, customerIdUser and serviceType) of a subscription."
+      responses:
+        '200':
+          description: "Subscription updated successfully."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileSubscription'
+        '400':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+    delete:
+      description: "Deletes a subscription."
+      responses:
+        '204':
+          description: "Subscription deleted successfully."
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+
+components:
+  schemas:
+    MobileSubscription:
+      type: object
+      description: "Represents a subscription of a user for a particular mobile number"
+      required:
+        - id
+        - msisdn
+        - customerIdOwner
+        - customerIdUser
+        - serviceType
+        - serviceStartDate
+      properties:
+        id:
+          description: "Unique entity ID."
+          type: integer
+          readOnly: true
+          example: 123456789
+        msisdn:
+          description: "The mobile number in E164 format."
+          type: string
+          example: "35699123456"
+        customerIdOwner:
+          description: "The ID referencing the owner of this mobile number."
+          type: integer
+          example: 147852369
+        customerIdUser:
+          description: "The ID referencing the user of this mobile number."
+          type: integer
+          example: 987456321
+        serviceType:
+          description: "The type of service the user has subscribed to"
+          type: string
+          enum:
+            - "MOBILE_PREPAID"
+            - "MOBILE_POSTPAID"
+        serviceStartDate:
+          description: "The time this mobile number was created, encoded in Unix Epoch in Milliseconds."
+          type: int64
+          readOnly: true
+          example: 1607175422236
+
+    Error:
+      type: object
+      description: "Represents an error/problem encountered by the server."
+      required:
+        - message
+        - validationErrors
+      properties:
+        message:
+          description: "A description of the error encountered by the server"
+          type: string
+          example: "The entity specified has not been found"
+        validationErrors:
+          description: "A list of one or more validation errors due to possible incorrect data within the request"
+          type: array
+          items:
+            type: string
+            example: "The id field should not be specified within this request"
