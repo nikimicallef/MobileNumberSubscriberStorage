@@ -6,3 +6,4 @@
 
 ### Misc.
 - Security/authentication has been totally omitted from the implementation since was not mentioned in the specification.
+- No generator/validator has been used in order to ensure that the OpenAPI and the Java code match.

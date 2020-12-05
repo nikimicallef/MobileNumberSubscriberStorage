@@ -1,7 +1,7 @@
-openapi: 3.0.3
+openapi: "3.0.3"
 info:
   title: Epic Mobile Subscription Storage API
-  version: 1.0.0
+  version: "1.0.0"
 
 paths:
   /subscriptions:
@@ -44,7 +44,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/MobileSubscription'
         '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
     post:
       description: "Add a mobile number along with the subscriber's information."
       responses:
@@ -56,10 +56,17 @@ paths:
                 $ref: '#/components/schemas/MobileSubscription'
               example: {"msisdn":"35699123456", "customerIdOwner":147852369, "customerIdUser":987456321, "serviceType":"MOBILE_PREPAID"}
         '400':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
         '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
   /subscriptions/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          example: 123456789
     get:
       description: "Get the details of a subscription using the subscription ID."
       responses:
@@ -70,9 +77,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/MobileSubscription'
         '404':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
         '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
     put:
       description: "Updates the details (customerIdOwner, customerIdUser and serviceType) of a subscription."
       responses:
@@ -83,20 +90,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/MobileSubscription'
         '400':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
         '404':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
         '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
     delete:
       description: "Deletes a subscription."
       responses:
         '204':
           description: "Subscription deleted successfully."
         '404':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
         '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -136,7 +143,8 @@ components:
             - "MOBILE_POSTPAID"
         serviceStartDate:
           description: "The time this mobile number was created, encoded in Unix Epoch in Milliseconds."
-          type: int64
+          type: integer
+          format: int64
           readOnly: true
           example: 1607175422236
 
