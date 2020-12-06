@@ -1,27 +1,42 @@
 package com.epic.mobile.mappers;
 
-import com.epic.mobile.api.models.MobileSubscriptionApiModel;
-import com.epic.mobile.api.models.ServiceTypeEnum;
-import com.epic.mobile.repositories.models.MobileSubscription;
+import java.time.Instant;
+
+import org.openapitools.model.MobileSubscription;
+
+import com.epic.mobile.repositories.models.MobileSubscriptionDbModel;
 
 
 public class MobileSubscriptionMapper {
-    public static MobileSubscriptionApiModel convertToApiModel(final MobileSubscription dbModel) {
-        final ServiceTypeEnum serviceTypeEnum = ServiceTypeMapper.stringToEnum(dbModel.getServiceType());
 
-        return new MobileSubscriptionApiModel(dbModel.getId(),
-                dbModel.getMsisdn(),
-                dbModel.getCustomerIdOwner(),
-                dbModel.getCustomerIdUser(),
-                serviceTypeEnum,
-                dbModel.getServiceStartDate() );
+    // TODO: Object Mapper
+
+    public static MobileSubscription convertToApiModel(final MobileSubscriptionDbModel dbModel) {
+
+        final MobileSubscription apiModel = new MobileSubscription();
+        apiModel.setId(dbModel.getId());
+        apiModel.setMsisdn(dbModel.getMsisdn());
+        apiModel.setCustomerIdOwner(dbModel.getCustomerIdOwner());
+        apiModel.setCustomerIdUser(dbModel.getCustomerIdUser());
+        final MobileSubscription.ServiceTypeEnum serviceTypeEnum = MobileSubscription.ServiceTypeEnum.fromValue(dbModel.getServiceType());
+        apiModel.serviceType(serviceTypeEnum);
+        apiModel.setServiceStartDate(dbModel.getServiceStartDate().toEpochMilli());
+
+        return apiModel;
     }
 
-    public static MobileSubscription convertToDbModel(final MobileSubscriptionApiModel apiModel, final boolean nullFields) {
-        return new MobileSubscription(
-                apiModel.getMsisdn(),
-                apiModel.getCustomerIdOwner(),
-                apiModel.getCustomerIdUser(),
-                apiModel.getServiceType().getFriendlyName());
+    public static MobileSubscriptionDbModel convertToDbModel(final MobileSubscription apiModel, final boolean nullFields) {
+        final MobileSubscriptionDbModel dbModel = new MobileSubscriptionDbModel();
+        dbModel.setMsisdn(apiModel.getMsisdn());
+        dbModel.setCustomerIdOwner(apiModel.getCustomerIdOwner());
+        dbModel.setCustomerIdUser(apiModel.getCustomerIdUser());
+        dbModel.setServiceType(apiModel.getServiceType().getValue());
+
+        if (!nullFields) {
+            dbModel.setId(apiModel.getId());
+            dbModel.setServiceStartDate(Instant.ofEpochMilli(apiModel.getServiceStartDate()));
+        }
+
+        return dbModel;
     }
 }

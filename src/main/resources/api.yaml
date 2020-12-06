@@ -47,6 +47,18 @@ paths:
           $ref: '#/components/schemas/Error'
     post:
       description: "Add a mobile number along with the subscriber's information."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileSubscription'
+            example: |
+              {
+                "msisdn": "35699123456",
+                "customerIdOwner": 1,
+                "customerIdUse": 1,
+                "serviceType": "MOBILE_PREPAID"
+              }
       responses:
         '201':
           description: "Subscription created successfully."
@@ -82,6 +94,18 @@ paths:
           $ref: '#/components/schemas/Error'
     put:
       description: "Updates the details (customerIdOwner, customerIdUser and serviceType) of a subscription."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileSubscription'
+            example: |
+              {
+                "msisdn": "35699123456",
+                "customerIdOwner": 1,
+                "customerIdUse": 1,
+                "serviceType": "MOBILE_PREPAID"
+              }
       responses:
         '200':
           description: "Subscription updated successfully."
@@ -130,10 +154,12 @@ components:
         customerIdOwner:
           description: "The ID referencing the owner of this mobile number."
           type: integer
+          minimum: 1
           example: 147852369
         customerIdUser:
           description: "The ID referencing the user of this mobile number."
           type: integer
+          minimum: 1
           example: 987456321
         serviceType:
           description: "The type of service the user has subscribed to"
