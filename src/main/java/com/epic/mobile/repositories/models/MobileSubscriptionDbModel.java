@@ -15,7 +15,6 @@ public class MobileSubscriptionDbModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    // TODO: Not auto-incremental
     private int id;
     @Column(unique = true)
     private String msisdn;

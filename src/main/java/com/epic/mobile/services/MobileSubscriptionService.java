@@ -81,9 +81,6 @@ public class MobileSubscriptionService {
      * @return the created mobile subscription
      */
     public MobileSubscription createMobileSubscription(final MobileSubscription inputApiModel) {
-
-        // TODO: Thread safety/concurrency
-
         LOGGER.debug("Entered POST service method with body {}", inputApiModel.toString());
 
         final List<String> validationErrors = new ArrayList<>();
@@ -135,9 +132,6 @@ public class MobileSubscriptionService {
      * @return the updated mobile subscription entity
      */
     public MobileSubscription updateMobileSubscription(final Integer id, final MobileSubscription inputApiModel) {
-
-        // TODO: Thread safety/concurrency
-
         LOGGER.debug("Entered PUT service method with id {} and input model {}", id, inputApiModel.toString());
 
         final MobileSubscriptionDbModel mobileSubscriptionDbModel = retrieveMobileSubscription(id);
