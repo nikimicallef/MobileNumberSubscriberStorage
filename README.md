@@ -48,7 +48,7 @@ The following are the known attributes of a mobile subscriber:
 1. You can delete the container using the `docker rm mobilenumbersubscriptionstorage` command.
 1. You can delete the original image using the `docker rmi mobilenumbersubscriptionstorage` command.
 
-NOTE: It is possible to import the application within an IDE however the application needs to be run first using the `mvn clean install ` command. This will generate the required code in the `target` folder. The project might need to be re-indexed.
+NOTE: It is possible to import the application within an IDE however the application needs to be run first using the `mvn clean install` command. This will generate the required code in the `target` folder. The project might need to be re-indexed.
 
 ## Improvements
 - The `id` field should not be auto-incremental. Ideally, a random number is used, or better yet, a UUID.
