@@ -92,7 +92,7 @@ public class MobileSubscriptionService {
 
         LOGGER.debug("Input entity is valid");
 
-        final MobileSubscriptionDbModel mobileSubscriptionDbModel = MobileSubscriptionMapper.convertToDbModel(inputApiModel, true);
+        final MobileSubscriptionDbModel mobileSubscriptionDbModel = MobileSubscriptionMapper.convertToDbModel(inputApiModel);
         mobileSubscriptionDbModel.setServiceStartDate(Instant.now(Clock.systemUTC()));
 
         final MobileSubscriptionDbModel dbModel;
@@ -146,11 +146,11 @@ public class MobileSubscriptionService {
 
         final List<String> validationErrors = new ArrayList<>();
 
-        if (!inputApiModel.getMsisdn().equals(mobileSubscriptionDbModel.getMsisdn())) {
-            validationErrors.add("The `msisdn` can not be updated.");
-        }
-
-        validateInput(inputApiModel, validationErrors);
+        validateInput(inputApiModel,
+                id,
+                mobileSubscriptionDbModel.getMsisdn(),
+                mobileSubscriptionDbModel.getServiceStartDate().toEpochMilli(),
+                validationErrors);
 
         LOGGER.debug("Input entity is valid");
 
@@ -179,25 +179,40 @@ public class MobileSubscriptionService {
     }
 
     /**
-     * Validates that all the fields are not null and valid
+     * Validates that all the fields are valid.
+     * Typically used for POST requests since it does not specify any of the final values which may not be changed
      *
-     * @param apiModel         to validate
-     * @param validationErrors error to be added to this list (if required)
+     * @param newApiModel              to be validated
+     * @param validationErrors         errors to be added to this list (if required)
      */
-    private void validateInput(final MobileSubscription apiModel, final List<String> validationErrors) {
-        validateId(apiModel.getId(), validationErrors);
+    private void validateInput(final MobileSubscription newApiModel, final List<String> validationErrors) {
+        validateInput(newApiModel, null, null, null, validationErrors);
+    }
 
-        validateMsisdn(apiModel.getMsisdn(), validationErrors);
+    /**
+     * Validates that all the fields are valid.
+     * Typically used for PUT requests since it also compares unchanged values
+     *
+     * @param newApiModel              to be validated
+     * @param originalId               to be validated against (if the request is a PUT request)
+     * @param originalMsisdn           to be validated against (if the request is a PUT request)
+     * @param originalServiceStartDate to be validated against (if the request is a PUT request)
+     * @param validationErrors         errors to be added to this list (if required)
+     */
+    private void validateInput(final MobileSubscription newApiModel, final Integer originalId, final String originalMsisdn, final Long originalServiceStartDate, final List<String> validationErrors) {
+        validateId(newApiModel.getId(), originalId, validationErrors);
 
-        validateCustomerId(apiModel.getCustomerIdOwner(), validationErrors, "Owner");
+        validateMsisdn(newApiModel.getMsisdn(), originalMsisdn, validationErrors);
 
-        validateCustomerId(apiModel.getCustomerIdUser(), validationErrors, "User");
+        validateCustomerId(newApiModel.getCustomerIdOwner(), validationErrors, "Owner");
 
-        if (apiModel.getServiceType() == null) {
+        validateCustomerId(newApiModel.getCustomerIdUser(), validationErrors, "User");
+
+        if (newApiModel.getServiceType() == null) {
             validationErrors.add("`serviceType` field must not be null");
         }
 
-        validateServiceStartDate(apiModel.getServiceStartDate(), validationErrors);
+        validateServiceStartDate(newApiModel.getServiceStartDate(), originalServiceStartDate, validationErrors);
 
         if (!validationErrors.isEmpty()) {
             LOGGER.debug("Input entity invalid");
@@ -206,28 +221,48 @@ public class MobileSubscriptionService {
     }
 
     /**
-     * Validates that the serviceStartDate is
-     * a) null
+     * Validates whether the ID passed in is valid.
+     * For the POST request, this ID needs to be null. For the PUT request, it has to be equal to the value stored within the database
      *
-     * @param serviceStartDate field to validate
+     * @param newId            passed in with the incoming request
+     * @param originalId       stored in the database
      * @param validationErrors error to be added to this list (if required)
      */
-    private void validateServiceStartDate(final Long serviceStartDate, final List<String> validationErrors) {
-        if (serviceStartDate != null) {
-            validationErrors.add("The `serviceStartDate` field should not be passed in");
+    private void validateId(final Integer newId, final Integer originalId, final List<String> validationErrors) {
+        // originalId is null on the POST request
+        if (originalId == null && newId != null) {
+            // If id is specified in the POST request, then this is incorrect
+            validationErrors.add("The `id` field should not be passed in");
+        } else if (originalId != null && !originalId.equals(newId)) {
+            // If id passed into the PUT request is not equal to the one passed stored in the DB, then this is incorrect
+            validationErrors.add("The `id` field can not be changed");
         }
     }
 
     /**
-     * Validates that the id is
-     * a) null
+     * Validates that the msisdn is
+     * a) not null
+     * b) Matches the E164 format
+     * c) equivalent to the value stored in the database
      *
-     * @param id               field to validate
+     * @param msisdn           field to validate
+     * @param originalMsisdn   msisdn value
      * @param validationErrors error to be added to this list (if required)
      */
-    private void validateId(final Integer id, final List<String> validationErrors) {
-        if (id != null) {
-            validationErrors.add("The `id` field should not be passed in");
+    private void validateMsisdn(final String msisdn, final String originalMsisdn, final List<String> validationErrors) {
+        // msisdn must always be populated
+        if (msisdn == null) {
+            // If not populated, error
+            validationErrors.add("`msisdn` field must not be null");
+        } else {
+            // If populated but doesn't match E164 regex, error
+            if (!msisdn.matches(MSISDN_REGEX)) {
+                validationErrors.add("The `msisdn` must be between 2 and 15 characters long and contain only numbers");
+            }
+            // If original msisdn is present (PUT request) and the msisdn passed in the PUT request is changes, error
+            if (originalMsisdn != null && !originalMsisdn.equals(msisdn)) {
+                validationErrors.add("The `msisdn` can not be updated.");
+            }
         }
     }
 
@@ -249,19 +284,21 @@ public class MobileSubscriptionService {
     }
 
     /**
-     * Validates that the msisdn is
-     * a) not null
-     * b) Matches the E164 format
+     * Validates whether the serviceStartDate passed in is valid.
+     * For the POST request, this ID needs to be null. For the PUT request, it has to be equal to the value stored within the database
      *
-     * @param msisdn           field to validate
-     * @param validationErrors error to be added to this list (if required)
+     * @param serviceStartDate         passed in with the incoming request
+     * @param originalServiceStartDate stored in the database
+     * @param validationErrors         error to be added to this list (if required)
      */
-    private void validateMsisdn(final String msisdn, final List<String> validationErrors) {
-        if (msisdn == null) {
-            // TODO: Try and remove. Also try and check null fields from the API itself.
-            validationErrors.add("`msisdn` field must not be null");
-        } else if (!msisdn.matches(MSISDN_REGEX)) {
-            validationErrors.add("The `msisdn` must be between 2 and 15 characters long and contain only numbers");
+    private void validateServiceStartDate(final Long serviceStartDate, final Long originalServiceStartDate, final List<String> validationErrors) {
+        // originalServiceStartDate is null on the POST request
+        if (originalServiceStartDate == null && serviceStartDate != null) {
+            // If serviceStartDate is specified in the POST request, then this is incorrect
+            validationErrors.add("The `serviceStartDate` field should not be passed in");
+        } else if (originalServiceStartDate != null && !originalServiceStartDate.equals(serviceStartDate)) {
+            // If serviceStartDate passed into the PUT request is not equal to the one passed stored in the DB, then this is incorrect
+            validationErrors.add("The `serviceStartDate` field can not be changed");
         }
     }
 }
