@@ -114,6 +114,13 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.epic.mobile.MobileNumberSubscriberStorage</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
