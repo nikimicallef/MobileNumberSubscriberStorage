@@ -176,8 +176,8 @@ public class MobileSubscriptionService {
      * Validates that all the fields are valid.
      * Typically used for POST requests since it does not specify any of the final values which may not be changed
      *
-     * @param newApiModel              to be validated
-     * @param validationErrors         errors to be added to this list (if required)
+     * @param newApiModel      to be validated
+     * @param validationErrors errors to be added to this list (if required)
      */
     private void validateInput(final MobileSubscription newApiModel, final List<String> validationErrors) {
         validateInput(newApiModel, null, null, null, validationErrors);

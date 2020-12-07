@@ -81,7 +81,6 @@ public class MobileSubscriptionServiceTest {
 
         final List<MobileSubscription> returnedSubscriptions = mobileSubscriptionService.getMobileSubscription(msisdn, customerIdOwner, customerIdUser, serviceType);
 
-
         assertEquals(dbSubscriptions.size(), returnedSubscriptions.size());
         verify(repository).findByMsisdnAndAndCustomerIdOwnerAndCustomerIdUserAndServiceType(msisdn, customerIdOwner, customerIdUser, serviceType);
     }
@@ -283,7 +282,7 @@ public class MobileSubscriptionServiceTest {
         mobileSubscription.setCustomerIdOwner(PODAM_FACTORY.manufacturePojo(Integer.class));
         mobileSubscription.serviceType(ThreadLocalRandom.current().nextDouble() < 0.5 ? MobileSubscription.ServiceTypeEnum.PREPAID : MobileSubscription.ServiceTypeEnum.POSTPAID);
 
-        if(generateDefaultFields) {
+        if (generateDefaultFields) {
             mobileSubscription.setId(PODAM_FACTORY.manufacturePojo(Integer.class));
             mobileSubscription.setServiceStartDate(PODAM_FACTORY.manufacturePojo(Long.class));
         }
