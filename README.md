@@ -2,7 +2,7 @@
 
 ## High-level Requirements
 
-Implement a REST Web-Service responsible of maintaining a database of mobile numbers, that are assigned to clients, along with some related information. The service should support these functionalities:
+Implement a REST Web-Service responsible of maintaining a database of mobile numbers assigned to clients along with some related information. The service should support the following fuctionality:
 - Return all mobile numbers from the database
 - Return all mobile numbers that match the search criteria
 - Add a mobile number to the database
@@ -23,15 +23,15 @@ The following are the known attributes of a mobile subscriber:
 ## API Design Decisions
 
 - An OpenAPI specification has been created for the `/subscriptions` endpoint. 
-- It has been assumed that the names of the API fields specified are final and should be used as specified within the API. 
-- Even though the `id` and the `service_start_date` are set as mandatory in the spec. sheet, this has been interpreted as the fields being mandatory in the database, not in the POST request. In fact, if they are passed in a POST request, then a 400 response is returned.
-- In an effort to favor the uniform interface approach, the user can pass in the `id` and the `service_start_date` in the PUT request however if the values do not match the values stored within the database, a 400 response is returned.
+- It has been assumed that the names of the API fields specified within the table above have been agreed upon previously. 
+- Even though the `id` and the `service_start_date` are set as mandatory in the table above, this has been interpreted as the fields being mandatory in the database, not in the POST request. If they are passed in a POST request, then a 400 response is returned.
+- In an effort to favor the uniform interface approach, the user can pass in the `id`, `msisdn` and the `service_start_date` in the PUT request however if the values do not match the values stored within the database, a 400 response is returned.
 - The [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) was used to generate the controller interface in order to ensure that the specification and the implementation match. 
 
 ## Database Decisions
 - An H2 in memory database has been used. The data within the database will be deleted upon the application being shut down.
 - The `id` field is the primary key and it is auto-generated.
-- The `msisdn` field is `unique` in order to protect at a database level concurrent inserts.
+- The `msisdn` field is `unique` in order to protect from concurrent inserts.
 - The `id`, `msisdn` and `serviceStartDate` fields can not be updated. They are effectively final.
 
 ## Other Assumptions
@@ -51,7 +51,7 @@ The following are the known attributes of a mobile subscriber:
 NOTE: It is possible to import the application within an IDE however the application needs to be run first using the `mvn clean install ` command. This will generate the required code in the `target` folder. The project might need to be re-indexed.
 
 ## Improvements
-- The `id` field should not-be auto-incremental. Ideally, a random number is used or better yet, a UUID.
+- The `id` field should not be auto-incremental. Ideally, a random number is used, or better yet, a UUID.
 - Adding security (authentication and authorization).
 - `null` validation at an API level (rather than at a service layer).
 - Component/integration testing, in order to ensure that the different application layers work well with each other.
